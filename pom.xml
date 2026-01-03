@@ -14,7 +14,7 @@
     
     <groupId>com.wallet</groupId>
     <artifactId>wallet-service</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.1</version>
     <name>Wallet Service</name>
     <description>Wallet service with deposit/withdraw operations</description>
     
@@ -43,6 +43,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     
