@@ -51,7 +51,7 @@ public class WalletService {
         return WalletOperationResponse.of(
             wallet.getId(),
             wallet.getBalance(),
-            request.getOperationType(),
+            request.getOperationType().name(),
             request.getAmount()
         );
     }

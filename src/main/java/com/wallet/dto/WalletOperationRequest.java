@@ -30,11 +30,11 @@ public class WalletOperationRequest {
     private BigDecimal amount;
     
     public static WalletOperationRequest of(UUID walletId, OperationType operationType, BigDecimal amount) {
-        return WalletOperationRequest.builder()
-            .walletId(walletId)
-            .operationType(operationType)
-            .amount(amount)
-            .build();
+        WalletOperationRequest request = new WalletOperationRequest();
+        request.setWalletId(walletId);
+        request.setOperationType(operationType);
+        request.setAmount(amount);
+        return request;
     }
     
     public enum OperationType {
