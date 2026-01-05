@@ -1,10 +1,10 @@
 package com.wallet.entity;
+import com.wallet.exception.InsufficientFundsException;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.AccessLevel;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "wallets")
 @Data
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Wallet {
@@ -58,13 +58,13 @@ public class Wallet {
     }
     
     public BigDecimal withdraw(BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Withdrawal amount must be positive");
-        }
-        if (this.balance.compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Insufficient funds");
-        }
-        this.balance = this.balance.subtract(amount);
-        return this.balance;
+    if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new IllegalArgumentException("Withdrawal amount must be positive");
     }
+    if (this.balance.compareTo(amount) < 0) {
+        throw new InsufficientFundsException(this.id, this.balance, amount);
+    }
+    this.balance = this.balance.subtract(amount);
+    return this.balance;
+}
 }
