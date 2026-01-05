@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: wallet-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-walletdb}
+      POSTGRES_USER: ${DB_USERNAME:-wallet_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-wallet_password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-wallet_user} -d ${DB_NAME:-walletdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=${DB_MAX_CONNECTIONS:-100}"
+      - "-c"
+      - "shared_buffers=${DB_SHARED_BUFFERS:-256MB}"
+      - "-c"
+      - "effective_cache_size=${DB_EFFECTIVE_CACHE_SIZE:-1GB}"
+      - "-c"
+      - "maintenance_work_mem=${DB_MAINTENANCE_WORK_MEM:-64MB}"
+      - "-c"
+      - "checkpoint_completion_target=${DB_CHECKPOINT_COMPLETION_TARGET:-0.9}"
+      - "-c"
+      - "wal_buffers=${DB_WAL_BUFFERS:-16MB}"
+      - "-c"
+      - "default_statistics_target=${DB_DEFAULT_STATISTICS_TARGET:-100}"
+      - "-c"
+      - "random_page_cost=${DB_RANDOM_PAGE_COST:-1.1}"
+      - "-c"
+      - "effective_io_concurrency=${DB_EFFECTIVE_IO_CONCURRENCY:-200}"
+      - "-c"
+      - "work_mem=${DB_WORK_MEM:-4MB}"
+      - "-c"
+      - "min_wal_size=${DB_MIN_WAL_SIZE:-1GB}"
+      - "-c"
+      - "max_wal_size=${DB_MAX_WAL_SIZE:-4GB}"
+
+  wallet-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wallet-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-walletdb}
+      DB_USERNAME: ${DB_USERNAME:-wallet_user}
+      DB_PASSWORD: ${DB_PASSWORD:-wallet_password}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-20}
+      DB_POOL_MIN_IDLE: ${DB_POOL_MIN_IDLE:-5}
+      DB_CONNECTION_TIMEOUT: ${DB_CONNECTION_TIMEOUT:-30000}
+      DB_IDLE_TIMEOUT: ${DB_IDLE_TIMEOUT:-600000}
+      DB_MAX_LIFETIME: ${DB_MAX_LIFETIME:-1800000}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SHOW_SQL: ${SHOW_SQL:-false}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
